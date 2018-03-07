@@ -18,10 +18,14 @@ int main (int argc, char **argv) {
         printf("Opis: %s\n", strerror(errno));
         exit(errno);
     }
-    read (f1, b, c);
-    printf("%s: Przeczytano %d znakow z pliku %s: \"%s\"\n",
-	   argv[0], c, n1, b);
-    close(f1);
- 
+    if(read (f1, b, c) == -1) {
+        printf("Opis: %s\n", strerror(errno));
+        close(f1);
+        exit(errno);
+    } else {
+        printf("%s: Przeczytano %d znakow z pliku %s: \"%s\"\n",
+	    argv[0], c, n1, b);
+        close(f1);
+    }
     return(0);
 }

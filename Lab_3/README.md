@@ -1,6 +1,6 @@
 # Advanced File I/O
 
-### The difference between system functions stat(), fstat() and lstat()
+### The difference between system functions stat(2), fstat(2) and lstat(2)
 
 These functions return information about a file, in the buffer pointed to by buf.  No permissions are required on the file itself, but—in the case of ```stat()```, ```fstatat()```, and ```lstat()``` execute  (search)  permission is required on all of the directories in pathname that lead to the file.
 
@@ -35,3 +35,49 @@ struct stat {
  };
  ```
 ```S_IFMT``` flag for ```st_mode``` field represents mask for file type
+
+### The difference between system functions getpwuid(3), getgrgid(3) and getlogin(3)
+
+```getpwuid()``` function returns a pointer to a structure containing the broken-out fields of  the  record  in  the password database that matches the user ID uid.
+
+```
+struct passwd {
+     char   *pw_name;       /* username */
+     char   *pw_passwd;     /* user password */
+     uid_t   pw_uid;        /* user ID */
+     gid_t   pw_gid;        /* group ID */
+     char   *pw_gecos;      /* user information */
+     char   *pw_dir;        /* home directory */
+     char   *pw_shell;      /* shell program */
+ };
+```
+
+```getgrgid()``` function returns a pointer to a structure containing the broken-out  fields of the record in the group database that matches the group ID gid.
+
+```
+struct group {
+     char   *gr_name;        /* group name */
+     char   *gr_passwd;      /* group password */
+     gid_t   gr_gid;         /* group ID */
+     char  **gr_mem;         /* NULL-terminated array of pointers
+                                to names of group members */
+ };
+```
+
+```getlogin()``` returns  a  pointer  to a string containing the name of the user logged in on the controlling terminal of the process,  or  a  null pointer if this information cannot be determined.  The string is statically allocated and might be overwritten on subsequent  calls  to  this function or to cuserid().
+
+### The difference between system functions time(2), strftime(3) and difftime(3)
+
+```time()``` returns  the  time  as  the  number of seconds since the Epoch, 1970-01-01 00:00:00 +0000 (UTC).
+
+```strftime()``` function  formats the broken-down time tm according to the format specification format and places the result in the  character array s of size max.
+
+```difftime()``` function returns the number of seconds elapsed between time time1 and time time0, represented as a double.  Each of the  times is  specified  in calendar time, which means its value is a measurement (in seconds) relative to the Epoch, 1970-01-01 00:00:00 +0000 (UTC).
+
+### readlink(2)
+
+```readlink()``` places  the  contents  of the symbolic link pathname in the buffer buf, which has size bufsiz.  readlink() does not append  a  null byte  to  buf.   It  will  truncate the contents (to a length of bufsiz characters), in case the buffer is too small to hold all  of  the  contents.
+
+### Library functions aio_read(3), aio_write(3), aio_error(3), aio_return(3), aio_suspend(3)
+
+```aio_read()``` 

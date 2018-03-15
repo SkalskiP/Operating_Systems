@@ -4,11 +4,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <libgen.h>
+#include <pwd.h>
+#include <grp.h>
+#include <unistd.h>
 /* -------------------------------------------------------------------------------- */
  
 static void print_type(struct stat *sb);
 static void print_ino(const struct stat *sb);
-static void print_perms(const struct stat *sb);
+static void print_perms(const struct stat *sb, char *name);
 static void print_linkc(const struct stat *sb);
 static void print_owner(const struct stat *sb);
 static void print_size(const struct stat *sb);
@@ -16,6 +19,8 @@ static void print_laststch(const struct stat *sb);
 static void print_lastacc(const struct stat *sb);
 static void print_lastmod(const struct stat *sb);
 static void print_name(const struct stat *sb, char *name);
+static char* response_helper(int);
+static char* time_diff_helper(time_t);
 /* -------------------------------------------------------------------------------- */
  
 int  main(int argc, char *argv[])
@@ -35,7 +40,7 @@ int  main(int argc, char *argv[])
   print_type(&sb);
   print_name(&sb, argv[1]);
   print_ino(&sb);
-  print_perms(&sb);
+  print_perms(&sb, argv[1]);
   print_linkc(&sb);
   print_owner(&sb);
   print_size(&sb);
@@ -67,8 +72,9 @@ static void print_ino(const struct stat *sb){
 }
 /* -------------------------------------------------------------------------------- */
  
-static void print_perms(const struct stat *sb){
-  printf("Mode:                     %lo (octal)\n", (unsigned long) sb->st_mode);
+static void print_perms(const struct stat *sb, char *name){
+  printf("Mode:                     %lo (octal)\n", (unsigned long) sb->st_mode & (S_IRWXU | S_IRWXG | S_IRWXO));
+  printf("Your permisions:          read: %s, write: %s, execute: %s\n", response_helper(access(name, R_OK)), response_helper(access(name, W_OK)), response_helper(access(name, X_OK)));
 }
 /* -------------------------------------------------------------------------------- */
  
@@ -78,7 +84,13 @@ static void print_linkc(const struct stat *sb){
 /* -------------------------------------------------------------------------------- */
  
 static void print_owner(const struct stat *sb){
-  printf("Ownership:                UID=%ld   GID=%ld\n", (long) sb->st_uid, (long) sb->st_gid);
+
+  uid_t uid = sb->st_uid;
+  gid_t gid = sb->st_gid;
+  struct passwd * user_info = getpwuid(uid);
+  struct group * group_info = getgrgid(gid);
+
+  printf("Ownership:                %s(%ld)   %s(%ld)\n", user_info->pw_name, (long) uid, group_info->gr_name, (long) gid);
 }
 /* -------------------------------------------------------------------------------- */
  
@@ -90,17 +102,23 @@ static void print_size(const struct stat *sb){
 /* -------------------------------------------------------------------------------- */
  
 static void print_laststch(const struct stat *sb){
-  printf("Last status change:       %s", ctime(&sb->st_ctime));
+  const time_t *last_change = &sb->st_ctime;
+  printf("Last status change:       %s", ctime(last_change));
+  printf("Time since:               %s", time_diff_helper(*last_change));
 }
 /* -------------------------------------------------------------------------------- */
  
 static void print_lastacc(const struct stat *sb){
-  printf("Last file access:         %s", ctime(&sb->st_atime));
+  const time_t *last_access = &sb->st_atime;
+  printf("Last file access:         %s", ctime(last_access));
+  printf("Time since:               %s", time_diff_helper(*last_access));
 }
 /* -------------------------------------------------------------------------------- */
  
 static void print_lastmod(const struct stat *sb){
-  printf("Last file modification:   %s", ctime(&sb->st_mtime));
+  const time_t *last_mod = &sb->st_mtime;
+  printf("Last file modification:   %s", ctime(last_mod));
+  printf("Time since:               %s", time_diff_helper(*last_mod));
 }
 /* -------------------------------------------------------------------------------- */
  
@@ -109,3 +127,22 @@ static void print_name(const struct stat *sb, char *name){
   printf("Name of the file:         %s\n", bname);
 }
 /* -------------------------------------------------------------------------------- */
+
+static char* response_helper(int response_value){
+  if(response_value == 0){
+      return "yes";
+  }
+  else {
+      return "no";
+  }
+}
+/* -------------------------------------------------------------------------------- */
+
+static char* time_diff_helper(time_t time_stamp) {
+  char *result = (char *) malloc(sizeof(char) * 200);
+  time_t curtime;
+  time(&curtime);
+  time_t timediff = (int) difftime(curtime, time_stamp);
+  strftime(result, 200, "%H hours, %M minutes, %S seconds\n", gmtime( &timediff ));
+  return result;
+}

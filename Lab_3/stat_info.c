@@ -104,21 +104,27 @@ static void print_size(const struct stat *sb){
 static void print_laststch(const struct stat *sb){
   const time_t *last_change = &sb->st_ctime;
   printf("Last status change:       %s", ctime(last_change));
-  printf("Time since:               %s", time_diff_helper(*last_change));
+  char *state = time_diff_helper(*last_change);
+  printf("Time since:               %s", state);
+  free(state);
 }
 /* -------------------------------------------------------------------------------- */
  
 static void print_lastacc(const struct stat *sb){
   const time_t *last_access = &sb->st_atime;
   printf("Last file access:         %s", ctime(last_access));
-  printf("Time since:               %s", time_diff_helper(*last_access));
+  char *state = time_diff_helper(*last_access);
+  printf("Time since:               %s", state);
+  free(state);
 }
 /* -------------------------------------------------------------------------------- */
  
 static void print_lastmod(const struct stat *sb){
   const time_t *last_mod = &sb->st_mtime;
   printf("Last file modification:   %s", ctime(last_mod));
-  printf("Time since:               %s", time_diff_helper(*last_mod));
+  char *state = time_diff_helper(*last_mod);
+  printf("Time since:               %s", state);
+  free(state);
 }
 /* -------------------------------------------------------------------------------- */
  

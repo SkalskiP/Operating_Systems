@@ -7,7 +7,7 @@ int main(int argc, char *argv[]) {
 
     int pfd[2];
     size_t nread;
-    char buf[100];
+    char buf[1000];
     char * str = "Ur beautiful pipe example";
     char * str_write_start = "Writing to pipe...\n";
     char * str_write_end = "Writing to pipe ended\n";
@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
         case 0:
             printf("%s" , str_read_start);
             close(pfd[1]);
-            nread = read(pfd[0], buf, 100);
+            nread = read(pfd[0], buf, sizeof(buf));
             (nread != 0) ? printf("%s (%ld bytes)\n", buf, (long) nread) : printf("No data\n");
             printf("%s" , str_read_end);
             break;
@@ -34,7 +34,5 @@ int main(int argc, char *argv[]) {
             write(pfd[1], str, strlen(str));
             printf("%s" , str_write_end);
     }
-
-
     return 0;
 }
